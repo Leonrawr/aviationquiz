@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Aviation Written Exam Mega Quiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    /* ---- YOUR CSS goes here ---- */
+    body { font-family: Arial, sans-serif; background: #eaf4fc; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .card { background: #fff; padding: 2rem; border-radius: 16px; box-shadow: 0 6px 32px rgba(0,0,0,0.15); max-width: 490px; width: 100%; }
+    .question { font-size: 1.08rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.7em; }
+    .icon { font-size: 2rem; margin-right: 0.2em; }
+    .options { display: flex; flex-direction: column; gap: 0.5rem; }
+    button.option { padding: 0.6rem 1rem; border: 1px solid #dbeafe; border-radius: 8px; background: #f1f5f9; cursor: pointer; font-size: 1rem; }
+    button.option.correct { background: #bbf7d0; }
+    button.option.wrong { background: #fecaca; }
+    .result { margin-top: 1.2rem; font-size: 1.05rem; }
+    .center { text-align: center; }
+    .score { font-weight: bold; color: #2563eb; }
+    .buzzer { color: #d90429; font-weight: bold; font-size: 1.2em; margin-top: 0.4em; }
+    @media (max-width: 520px) {
+      .card { padding: 1rem; max-width: 99vw; }
+      .question { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 class="center">Aviation Written Exam<br>100-Question Mega Quiz ✈️</h2>
+    <div id="quiz"></div>
+  </div>
+
+  <!-- Sound effects for right/wrong answers -->
+  <audio id="chime" src="https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae7d1.mp3"></audio>
+  <audio id="buzzer" src="https://cdn.pixabay.com/audio/2022/03/15/audio_115b9b7bfa.mp3"></audio>
+
+  <script>
+    // ---- Your questions array (all 100 questions) goes here! ----
+    const questions = [
+      {
+        icon: "🚦",
+        question: "What does a solid red light gun signal from the control tower mean to an aircraft on the ground?",
+        options: [
+          "Cleared for takeoff",
+          "Stop",
+          "Taxi clear of runway in use",
+          "Return to starting point on airport",
+        ],
+        answer: 1,
+        explanation: "A solid red light means STOP for aircraft on the ground."
+      },
+      {
+        icon: "⚙️",
+        question: "The basic purpose of adjusting the fuel/air mixture at altitude is to:",
+        options: [
+          "Decrease the amount of fuel in the mixture",
+          "Increase the amount of fuel in the mixture",
+          "Increase the amount of air in the mixture",
+          "Decrease the amount of air in the mixture",
+        ],
+        answer: 0,
+        explanation: "As altitude increases, air density decreases, so you need less fuel in the mixture."
+      },
+      {
+        icon: "📡",
+        question: "What is the correct transponder code for an in-flight emergency?",
+        options: ["7500", "7600", "7700", "1200"],
+        answer: 2,
+        explanation: "7700 is the general emergency squawk code."
+      },
+      {
+        icon: "👀",
+        question: "What does 'VFR' stand for?",
+        options: [
+          "Visual Flight Rules",
+          "Very Fast Rotation",
+          "Vertical Flight Regulations",
+          "Variable Fuel Rate",
+        ],
+        answer: 0,
+        explanation: "'VFR' means Visual Flight Rules."
+      },
+      {
+        icon: "🌐",
+        question: "What class of airspace requires an operating Mode C transponder above 10,000 feet MSL?",
+        options: [
+          "Class G",
+          "Class D",
+          "All airspace, except below 2,500 feet AGL",
+          "Class E",
+        ],
+        answer: 2,
+        explanation: "Mode C is required in all airspace above 10,000 feet MSL, except below 2,500 feet AGL."
+      },
+      {
+        icon: "🛫",
+        question: "When is a go-around appropriate?",
+        options: [
+          "When the runway is wet",
+          "If the approach is unstable or unsafe to land",
+          "Whenever you feel tired",
+          "After touchdown",
+        ],
+        answer: 1,
+        explanation: "A go-around is always appropriate if the approach is unstable or a safe landing can't be made."
+      },
+      {
+        icon: "🌀",
+        question: "What is the meaning of a segmented circle at an airport?",
+        options: [
+          "Shows the airport boundary",
+          "Provides traffic pattern information",
+          "Indicates parking locations",
+          "Shows magnetic variation",
+        ],
+        answer: 1,
+        explanation: "A segmented circle provides visual traffic pattern information."
+      },
+      {
+        icon: "🩺",
+        question: "A third-class medical certificate for a pilot under age 40 is valid for how long?",
+        options: [
+          "12 calendar months",
+          "24 calendar months",
+          "60 calendar months",
+          "36 calendar months",
+        ],
+        answer: 2,
+        explanation: "For pilots under 40, a third-class medical is valid for 60 calendar months."
+      },
+      {
+        icon: "💨",
+        question: "What is the maximum speed permitted below 10,000 feet MSL?",
+        options: [
+          "250 knots",
+          "200 knots",
+          "180 knots",
+          "350 knots",
+        ],
+        answer: 0,
+        explanation: "250 knots is the maximum indicated airspeed below 10,000 feet MSL."
+      },
+      {
+        icon: "⛰️",
+        question: "What information does the altimeter provide?",
+        options: [
+          "Indicated airspeed",
+          "Rate of climb",
+          "Aircraft's height above mean sea level",
+          "Aircraft's pitch angle",
+        ],
+        answer: 2,
+        explanation: "The altimeter shows the aircraft's altitude above mean sea level."
+      },
+      {
+        icon: "🌦️",
+        question: "Which type of weather briefing provides the most complete information?",
+        options: [
+          "Abbreviated briefing",
+          "Standard briefing",
+          "Outlook briefing",
+          "Update briefing",
+        ],
+        answer: 1,
+        explanation: "A standard briefing gives the most complete preflight weather info."
+      },
+      {
+        icon: "🛩️",
+        question: "What is the primary purpose of wing flaps?",
+        options: [
+          "Decrease drag",
+          "Increase lift and allow a steeper approach",
+          "Reduce stall speed in a dive",
+          "Decrease angle of descent without increasing airspeed",
+        ],
+        answer: 1,
+        explanation: "Flaps increase lift, letting you approach more steeply at slower speeds."
+      },
+      {
+        icon: "🚨",
+        question: "What frequency is used for emergency communications?",
+        options: [
+          "122.8 MHz",
+          "121.5 MHz",
+          "123.0 MHz",
+          "118.0 MHz",
+        ],
+        answer: 1,
+        explanation: "121.5 MHz is the emergency frequency."
+      },
+      {
+        icon: "🤔",
+        question: "What is the primary cause of most aviation accidents?",
+        options: [
+          "Engine failure",
+          "Weather",
+          "Pilot error",
+          "ATC instructions",
+        ],
+        answer: 2,
+        explanation: "Statistically, pilot error is the leading cause."
+      },
+      {icon: "🛩️", question: "What is the primary purpose of wing flaps?", options: ["Decrease drag", "Increase lift and allow a steeper approach", "Reduce stall speed in a dive", "Decrease angle of descent without increasing airspeed"], answer: 1, explanation: "Flaps increase lift, letting you approach more steeply at slower speeds."},
+      {icon: "🤔", question: "What is the primary cause of most aviation accidents?", options: ["Engine failure", "Weather", "Pilot error", "ATC instructions"], answer: 2, explanation: "Statistically, pilot error is the leading cause."},
+      {icon: "🌡️", question: "What is the standard temperature lapse rate?", options: ["2°C per 1,000 feet", "2°F per 1,000 feet", "1°C per 1,000 feet", "3.5°C per 1,000 feet"], answer: 0, explanation: "Standard temperature decreases 2°C per 1,000 feet."},
+      {icon: "📝", question: "What does a METAR report?", options: ["Forecasted weather", "Actual current observed weather", "NOTAMs", "Airmets"], answer: 1, explanation: "METAR is an actual weather observation."},
+      {icon: "🎛️", question: "Which instrument will become inoperative if the pitot tube is clogged?", options: ["Altimeter", "Vertical speed indicator", "Airspeed indicator", "Heading indicator"], answer: 2, explanation: "Airspeed indicator relies on pitot pressure."},
+      {icon: "📡", question: "What action is required if you experience radio failure in Class D airspace?", options: ["Squawk 7700", "Leave the airspace immediately", "Observe light gun signals", "Continue as normal"], answer: 2, explanation: "Tower will use light gun signals for communication."},
+      {icon: "↩️", question: "What is the standard direction of turns in a traffic pattern unless otherwise indicated?", options: ["Left", "Right", "Whichever is shorter", "No standard direction"], answer: 0, explanation: "Traffic patterns are usually left turns unless noted otherwise."},
+      {icon: "📍", question: "When are you required to have a mode C transponder?", options: ["Within 30 nautical miles of Class B airports", "Below 1,200 feet AGL", "At night only", "Only on IFR flights"], answer: 0, explanation: "Mode C is required in the 30 NM Mode C veil around Class B airports."},
+      // Questions 21-30
+      {icon: "🫁", question: "What is hypoxia?", options: ["Lack of fuel to the engine", "Lack of oxygen in the blood", "Lack of sleep", "Too much carbon dioxide in the cockpit"], answer: 1, explanation: "Hypoxia is when the body doesn't get enough oxygen."},
+      {icon: "➡️", question: "When two aircraft of the same category are converging, which has the right of way?", options: ["The one on the left", "The one at the higher altitude", "The one on the right", "The faster one"], answer: 2, explanation: "The aircraft on the right has the right of way."},
+      {icon: "🔄", question: "What is the purpose of the rudder?", options: ["Control pitch", "Control roll", "Control yaw", "Increase lift"], answer: 2, explanation: "The rudder controls yaw (left/right movement of the nose)."},
+      {icon: "☠️", question: "Which of the following is a symptom of carbon monoxide poisoning?", options: ["Dry mouth", "Blue lips and fingernails", "Headache and drowsiness", "Increased appetite"], answer: 2, explanation: "Headache, drowsiness, and eventually unconsciousness can result from CO poisoning."},
+      {icon: "⬅️➡️", question: "What action should you take if you encounter another aircraft head-on?", options: ["Both turn right", "Both turn left", "Climb", "Descend"], answer: 0, explanation: "Both pilots should turn right to avoid a head-on collision."},
+      {icon: "📑", question: "What type of NOTAM covers temporary flight restrictions?", options: ["FDC NOTAM", "Pointer NOTAM", "Military NOTAM", "SAA NOTAM"], answer: 0, explanation: "FDC NOTAMs cover regulatory changes, including temporary flight restrictions."},
+      {icon: "🌊", question: "What is ground effect?", options: ["Reduced lift and increased drag near the ground", "Increased lift and reduced drag near the ground", "Turbulence caused by terrain", "A type of weather event"], answer: 1, explanation: "Ground effect increases lift and reduces drag when flying close to the surface."},
+      {icon: "💨", question: "How should you correct for a crosswind on landing?", options: ["Use only aileron into the wind", "Use rudder into the wind", "Crab or slip into the wind as needed", "Always land diagonally across the runway"], answer: 2, explanation: "You can crab or slip into the wind to stay on the centerline during a crosswind landing."},
+      {icon: "📞", question: "What must a pilot do before entering Class C airspace?", options: ["Have two-way radio contact with ATC", "Request clearance", "Turn on landing lights", "Have a private pilot certificate"], answer: 0, explanation: "You need two-way communication with ATC before entering Class C airspace."},
+      {icon: "🔺", question: "What causes most wing stalls?", options: ["High airspeed", "Exceeding the critical angle of attack", "Full flaps", "Low power settings"], answer: 1, explanation: "Stalls happen when you exceed the wing's critical angle of attack."},
+      // Questions 31-40
+      {icon: "🌫️", question: "If the temperature/dewpoint spread is small and decreasing, what weather is likely?", options: ["Improving visibility", "Fog or low clouds", "Thunderstorms", "High winds"], answer: 1, explanation: "A small, decreasing temperature/dewpoint spread means fog or low clouds are likely."},
+      {icon: "☁️", question: "How far must you stay from clouds in Class G airspace below 1,200 feet AGL during the day?", options: ["500 feet below, 1,000 feet above, 2,000 feet horizontal", "Clear of clouds", "1 mile horizontally", "3 miles horizontally"], answer: 1, explanation: "In Class G below 1,200 AGL (day), you must remain clear of clouds."},
+      {icon: "🏙️", question: "What is the minimum safe altitude over a congested area?", options: ["1,000 feet above the highest obstacle within 2,000 feet", "500 feet above ground level", "2,000 feet above ground level", "750 feet above highest obstacle"], answer: 0, explanation: "Over congested areas, minimum altitude is 1,000 feet above highest obstacle within 2,000 feet."},
+      {icon: "⛽", question: "What is the minimum fuel reserve for day VFR flight?", options: ["30 minutes after reaching destination", "45 minutes after reaching destination", "60 minutes after reaching destination", "20 minutes after reaching destination"], answer: 0, explanation: "FARs require 30 minutes of fuel reserve for day VFR flight."},
+      {icon: "📣", question: "How do you indicate distress on the radio?", options: ["Say 'Mayday' three times", "Say 'Pan-Pan' three times", "Say 'Help' three times", "Say 'SOS' three times"], answer: 0, explanation: "'Mayday' is the international distress call."},
+      {icon: "📄", question: "Which document(s) must be aboard the aircraft during flight?", options: ["AROW: Airworthiness cert., Registration, Operating handbook, Weight & balance", "Pilot certificate", "Logbook", "Medical certificate"], answer: 0, explanation: "The AROW documents must always be onboard."},
+      {icon: "👓", question: "What is the minimum visibility for VFR flight in Class E airspace below 10,000 feet MSL?", options: ["1 statute mile", "3 statute miles", "5 statute miles", "10 statute miles"], answer: 1, explanation: "VFR minimum visibility in Class E below 10,000 feet is 3 SM."},
+      {icon: "🏁", question: "What is the maximum indicated airspeed allowed in the airspace underlying Class B airspace?", options: ["200 knots", "250 knots", "150 knots", "175 knots"], answer: 0, explanation: "Below Class B, max speed is 200 knots indicated."},
+      {icon: "👁️", question: "How should you scan for other aircraft during daylight hours?", options: ["Continuous sweeping motion", "By staring at one point", "Short, regularly spaced eye movements", "Only with peripheral vision"], answer: 2, explanation: "Use short, regularly spaced eye movements for effective scanning."},
+      {icon: "🛬", question: "Which preflight action is specifically required for flights not in the vicinity of an airport?", options: ["File a flight plan", "Check weather and NOTAMs", "Determine runway lengths and alternatives available", "Take off only from controlled airports"], answer: 2, explanation: "You must be aware of runway lengths and alternatives for flights not near an airport."},
+      // Questions 41-50
+      {icon: "🔊", question: "What does an ATIS broadcast provide?", options: ["Emergency instructions", "Automated terminal weather and info", "Runway lighting status", "Pilot training tips"], answer: 1, explanation: "ATIS is the Automatic Terminal Information Service (weather and info)."},
+      {icon: "⬆️⬇️", question: "Which flight control moves the nose up and down?", options: ["Aileron", "Rudder", "Elevator", "Trim tab"], answer: 2, explanation: "The elevator controls pitch (nose up/down)."},
+      {icon: "🥶", question: "What is the first indication of carburetor icing in most aircraft?", options: ["Rough engine operation", "Drop in oil pressure", "Drop in RPM", "Increase in fuel flow"], answer: 2, explanation: "A drop in RPM (fixed-pitch prop) or manifold pressure is the first sign of carb ice."},
+      {icon: "⚡", question: "What weather phenomenon is hazardous to aircraft and is invisible to the naked eye?", options: ["Icing", "Clear air turbulence", "Fog", "Thunderstorm"], answer: 1, explanation: "Clear air turbulence is invisible and dangerous."},
+      {icon: "📏", question: "What is the minimum distance from clouds for VFR flight in Class C airspace?", options: ["500 below, 1,000 above, 2,000 horizontal", "Clear of clouds", "1 mile horizontally", "3 miles horizontally"], answer: 0, explanation: "500 below, 1,000 above, 2,000 horizontal in Class C."},
+{icon: "🧭", question: "What is the heading indicator (directional gyro) susceptible to over time?", options: ["Magnetic variation", "Precession (drift)", "Altitude errors", "Humidity"], answer: 1, explanation: "The heading indicator drifts over time due to precession and must be periodically realigned with the magnetic compass."},
+      {icon: "🔥", question: "Which procedure helps avoid a hot engine start?", options: ["Use full throttle during start", "Follow manufacturer’s hot start procedures", "Prime excessively", "Crank the engine with mixture full rich"], answer: 1, explanation: "Follow the hot start procedures in your POH to avoid engine flooding."},
+      {icon: "📊", question: "If you load an aircraft to the most aft CG, what will happen?", options: ["It will be more stable", "It will be less stable and harder to recover from a stall", "It will climb faster", "It will be impossible to land"], answer: 1, explanation: "An aft CG makes the plane less stable and harder to recover from stalls."},
+      {icon: "⛅", question: "What does a TAF provide?", options: ["Surface wind only", "Forecasted weather at airports", "Actual current weather", "NOTAMs"], answer: 1, explanation: "TAFs are Terminal Aerodrome Forecasts for airports."},
+      {icon: "📝", question: "What does the abbreviation 'NOAA' stand for?", options: ["National Oceanic and Atmospheric Administration", "National Organization of Airport Authorities", "New Operations at Airports", "None of the above"], answer: 0, explanation: "NOAA provides weather information and charts."},
+      {icon: "🌦️", question: "A fast-moving cold front usually produces what type of weather?", options: ["Clear skies", "Thunderstorms, gusty winds, temperature drop", "Warm and calm", "Fog"], answer: 1, explanation: "Cold fronts are associated with turbulence, wind shifts, and possible thunderstorms."},
+      {icon: "⏲️", question: "What is the time limit for reporting an aviation accident to the NTSB?", options: ["Immediately", "Within 7 days", "Within 10 days", "Within 24 hours"], answer: 0, explanation: "Aviation accidents must be reported immediately to the NTSB."},
+      {icon: "🧑‍✈️", question: "Who is directly responsible for the safe operation of the aircraft?", options: ["ATC", "The pilot-in-command", "The owner", "The mechanic"], answer: 1, explanation: "The PIC is always directly responsible for the aircraft."},
+      {icon: "🧊", question: "What is a danger of flight in freezing rain?", options: ["Engine failure", "Carburetor icing only", "Rapid, severe airframe icing", "No effect"], answer: 2, explanation: "Freezing rain causes rapid, dangerous airframe icing."},
+      {icon: "🧑‍⚖️", question: "When must safety belts be worn by all occupants?", options: ["At all times", "During taxi, takeoff, and landing", "Only in turbulence", "Never"], answer: 1, explanation: "Belts must be worn by everyone during taxi, takeoff, and landing."},
+      {icon: "🛑", question: "If a VOR test signal shows the VOR receiver is 6° off, can it be used for IFR flight?", options: ["Yes", "No", "Only with ATC permission", "If noted in the logbook"], answer: 1, explanation: "VOR error must not exceed 4° to be IFR legal."},
+      {icon: "🛬", question: "During landing roll, you experience a strong crosswind from the right. What should you do with the ailerons?", options: ["Hold ailerons neutral", "Hold left aileron into the wind", "Hold right aileron into the wind", "Use rudder only"], answer: 2, explanation: "Use aileron into the wind (right aileron) during crosswind roll-out."},
+      {icon: "☀️", question: "What are cumulus clouds most likely to indicate?", options: ["Stable air", "Unstable, rising air (possible turbulence)", "Fog", "Smooth flying"], answer: 1, explanation: "Cumulus clouds = unstable air, rising currents, and possible turbulence."},
+      {icon: "📜", question: "Which regulation covers basic flight rules and pilot requirements?", options: ["FAR Part 61 & 91", "FAR Part 25", "FAR Part 43", "FAR Part 135"], answer: 0, explanation: "Part 61 covers certification, Part 91 covers operating rules."},
+      {icon: "🚧", question: "What is a NOTAM?", options: ["Notice to Airmen about aeronautical info", "Weather report", "Chart update", "Flight plan"], answer: 0, explanation: "NOTAM = Notice to Airmen, temporary important info."},
+      {icon: "💉", question: "How long after consuming alcohol may you act as a crew member?", options: ["2 hours", "8 hours", "12 hours", "24 hours"], answer: 1, explanation: "8 hours bottle to throttle!"},
+      {icon: "🎧", question: "Which is a proper radio phrase?", options: ["Say your message fast", "Use plain language", "Use standard phraseology", "Use text abbreviations"], answer: 2, explanation: "Use standard radio phraseology for clarity."},
+      {icon: "🗺️", question: "What color are Class C airspace rings on sectional charts?", options: ["Magenta", "Blue", "Red", "Green"], answer: 0, explanation: "Class C rings are solid magenta."},
+      {icon: "🚁", question: "What is the maximum allowable blood alcohol content to act as PIC?", options: ["0.08%", "0.04%", "0.02%", "0.10%"], answer: 1, explanation: "FAA limit is 0.04% BAC."},
+      {icon: "🔑", question: "What document must be shown to a law enforcement officer upon request?", options: ["Logbook", "Pilot certificate and photo ID", "Birth certificate", "Social Security card"], answer: 1, explanation: "Pilot certificate and government-issued photo ID must be presented on request."},
+      {icon: "🧨", question: "If you discover an inoperative piece of required equipment before flight, you must:", options: ["Fly anyway", "Cancel or defer per MEL/91.213", "Make a logbook entry", "Notify ATC"], answer: 1, explanation: "You cannot fly with required equipment inoperative unless the rules for inoperative equipment are followed."},
+      {icon: "🦺", question: "Which color are taxiway edge lights at night?", options: ["Red", "Blue", "Green", "White"], answer: 1, explanation: "Taxiway edge lights are blue."},
+      {icon: "🔋", question: "If your alternator fails in flight, what should you do first?", options: ["Turn off all nonessential equipment", "Declare emergency", "Descend immediately", "Turn on landing lights"], answer: 0, explanation: "Preserve battery power by reducing electrical load."},
+      {icon: "🧭", question: "Which way does a magnetic compass turn during acceleration on an east or west heading?", options: ["Turns north", "Turns south", "No effect", "Turns 90 degrees"], answer: 0, explanation: "Accelerate North, Decelerate South (ANDS) in the Northern Hemisphere."},
+      {icon: "🧑‍🔧", question: "Who is responsible for ensuring an aircraft is in an airworthy condition before flight?", options: ["Owner", "PIC", "Mechanic", "ATC"], answer: 1, explanation: "The pilot-in-command must ensure the aircraft is airworthy before flight."},
+      {icon: "🔔", question: "When must you notify the NTSB after an accident?", options: ["Within 10 days", "Immediately", "Within 24 hours", "Never"], answer: 1, explanation: "Immediate notification is required after a serious accident."},
+      {icon: "💡", question: "How is a runway with a displaced threshold marked?", options: ["Solid white bar across the runway", "Chevron markings", "Dashed white lines", "Yellow X"], answer: 0, explanation: "A displaced threshold is marked by a solid white bar across the runway."},
+      {icon: "🛑", question: "What is the effect of high density altitude on aircraft performance?", options: ["Increased performance", "Decreased performance", "No effect", "More engine power"], answer: 1, explanation: "High density altitude reduces engine, propeller, and wing performance."},
+      {icon: "🎈", question: "What effect does humidity have on aircraft performance?", options: ["No effect", "Improves climb rate", "Decreases performance", "Improves glide"], answer: 2, explanation: "High humidity decreases performance due to less oxygen per volume of air."},
+      {icon: "🛫", question: "What is the first action after an engine failure after takeoff?", options: ["Raise the nose", "Lower the nose for best glide", "Try to restart", "Call ATC"], answer: 1, explanation: "Lower the nose to maintain airspeed and avoid a stall."},
+      {icon: "🟦", question: "On sectional charts, what color is Class B airspace depicted?", options: ["Blue", "Magenta", "Green", "Red"], answer: 0, explanation: "Class B airspace is solid blue on sectionals."},
+      {icon: "🌬️", question: "What does a windsock fully extended indicate?", options: ["Calm winds", "Winds at or above 15 knots", "Winds at or above 3 knots", "Winds from the north"], answer: 1, explanation: "A fully extended windsock generally indicates 15 knots or more."},
+      {icon: "⏰", question: "How long is a student pilot certificate valid?", options: ["24 months", "12 months", "60 months", "It never expires"], answer: 3, explanation: "Student pilot certificates issued after April 2016 do not expire, but endorsements do."},
+      {icon: "👩‍✈️", question: "How often must a pilot perform a flight review to act as PIC?", options: ["Every year", "Every 24 calendar months", "Every 6 months", "Every 12 months"], answer: 1, explanation: "A flight review (BFR) is required every 24 calendar months."},
+      {icon: "🌧️", question: "What weather is associated with a warm front?", options: ["Clear skies", "Prolonged rain, low ceilings", "Snow only", "Thunderstorms"], answer: 1, explanation: "Warm fronts often bring steady rain and low ceilings."},
+      {icon: "🛩️", question: "What does a white and green rotating beacon indicate at night?", options: ["Military airport", "Heliport", "Land airport", "Water airport"], answer: 2, explanation: "White and green is a land airport beacon."},
+      {icon: "💥", question: "What is detonation?", options: ["Normal combustion", "Uncontrolled, explosive combustion", "Engine flooding", "Excessive magneto timing"], answer: 1, explanation: "Detonation is uncontrolled, explosive combustion in the cylinder."},
+      {icon: "🔎", question: "What causes compass deviation?", options: ["Wind", "Electromagnetic interference from aircraft systems", "Altitude", "Air temperature"], answer: 1, explanation: "Compass deviation is from interference from electronics and metal in the aircraft."},
+      {icon: "🔒", question: "If you lose communications in controlled airspace, what should you do?", options: ["Land immediately", "Continue and follow lost comm procedures", "Squawk 7500", "Return to home airport"], answer: 1, explanation: "Follow standard lost comm procedures and look for light gun signals."},
+      {icon: "🧭", question: "What instrument uses both static and pitot pressure?", options: ["Altimeter", "Vertical speed indicator", "Airspeed indicator", "Turn coordinator"], answer: 2, explanation: "Airspeed indicator uses both pitot (dynamic) and static pressure."},
+      {icon: "⚠️", question: "What is the definition of a 'ceiling' in aviation?", options: ["Height above sea level", "Lowest broken or overcast layer", "Height above airport elevation", "Cloud base"], answer: 1, explanation: "Ceiling is the lowest layer reported as broken or overcast, or vertical visibility."},
+      {icon: "🟪", question: "What color are Class D airspace rings on a sectional chart?", options: ["Magenta", "Blue dashed", "Red", "Black"], answer: 1, explanation: "Class D airspace is depicted by blue dashed rings."},
+      {icon: "🦻", question: "What should you do if ATIS information is not current?", options: ["Use the most recent one available", "Skip ATIS", "Call the FSS", "Land immediately"], answer: 0, explanation: "Use the most current ATIS available, and update if a new one is published."},
+      {icon: "💺", question: "What is the minimum number of seats with safety belts required in a small aircraft?", options: ["One", "All seats", "Pilot seat only", "Front seats"], answer: 1, explanation: "All seats must be equipped with safety belts."},
+      {icon: "🛠️", question: "Who can return an aircraft to service after a 100-hour inspection?", options: ["The owner", "A certificated A&P mechanic", "ATC", "Any pilot"], answer: 1, explanation: "An A&P mechanic can return the aircraft to service after a 100-hour inspection."},
+      {icon: "⏳", question: "How long must you wait after scuba diving before flying?", options: ["12 hours", "24 hours", "48 hours", "1 hour"], answer: 0, explanation: "Wait at least 12 hours after non-decompression dives, and 24 after decompression dives."},
+      {icon: "🧯", question: "What is the first step if you smell smoke in the cockpit?", options: ["Open a window", "Shut off electrical equipment", "Turn off the engine", "Descend rapidly"], answer: 1, explanation: "Shut off unnecessary electrical equipment to isolate the source."},
+      {icon: "⏱️", question: "How long does a temporary airman certificate last?", options: ["60 days", "120 days", "180 days", "24 months"], answer: 2, explanation: "Temporary certificates are valid for up to 180 days."},
+      {icon: "🌡️", question: "How does temperature affect density altitude?", options: ["Higher temperature, lower density altitude", "Higher temperature, higher density altitude", "No effect", "Higher temperature, better performance"], answer: 1, explanation: "Higher temperature increases density altitude and decreases performance."},
+      {icon: "🏳️", question: "What is the purpose of a CTAF?", options: ["Communicate at uncontrolled airports", "Request clearances", "Talk to ATC", "Monitor weather"], answer: 0, explanation: "CTAF is for self-announce at non-towered airports."},
+      {icon: "🗓️", question: "How often must the transponder be inspected?", options: ["Every 12 months", "Every 24 months", "Every 6 months", "Every 60 months"], answer: 1, explanation: "Transponder inspection is required every 24 calendar months."},
+      {icon: "🔦", question: "What color are taxiway centerline lights?", options: ["Blue", "Green", "White", "Red"], answer: 1, explanation: "Taxiway centerlines are green."},
+      {icon: "⚡", question: "What is an electrical system failure's first symptom?", options: ["Loss of all engine power", "Ammeter shows discharge", "Loss of radio", "Vacuum gauge to zero"], answer: 1, explanation: "Ammeter or warning light will indicate discharge first."},
+      {icon: "📝", question: "What is a PIREP?", options: ["Pilot report", "ATC instruction", "Weather forecast", "NOTAM"], answer: 0, explanation: "PIREP means Pilot Report, valuable for real-time weather."},
+      {icon: "🧯", question: "What type of fire extinguisher is best for cockpit electrical fires?", options: ["Water", "CO2 or Halon", "Foam", "Sand"], answer: 1, explanation: "CO2 or Halon are best for electrical fires."},
+      {icon: "🌪️", question: "What is wind shear?", options: ["Sudden change in wind speed/direction", "Tornado", "Thunderstorm only", "Calm winds"], answer: 0, explanation: "Wind shear is a rapid change in wind speed and/or direction."},
+      {icon: "🧳", question: "Where should heavy baggage be placed for best aircraft stability?", options: ["As far forward as possible", "As far aft as possible", "Anywhere", "In the baggage compartment"], answer: 0, explanation: "Forward loading improves stability."},
+      {icon: "🛫", question: "How is lift generated?", options: ["Bernoulli's principle and angle of attack", "By the rudder", "By turning the aircraft", "From the flaps only"], answer: 0, explanation: "Lift is mainly from Bernoulli's principle and angle of attack."},
+      {icon: "💺", question: "Who is responsible for briefing passengers on seat belts and exits?", options: ["PIC", "Flight attendant", "ATC", "Mechanic"], answer: 0, explanation: "The PIC is always responsible for the passenger briefing."},
+      {icon: "🛫", question: "How do you correct for left-turning tendencies on takeoff?", options: ["Left rudder", "Right rudder", "Right aileron", "Up elevator"], answer: 1, explanation: "Use right rudder to correct for left-turning tendencies."},
+      {icon: "🌧️", question: "Which weather condition is most favorable for carburetor icing?", options: ["High temp, low humidity", "Low temp, low humidity", "Moderate temp, high humidity", "Very cold and dry"], answer: 2, explanation: "Carburetor icing occurs most with moderate temp and high humidity."},
+      {icon: "🕳️", question: "What is a microburst?", options: ["Small area of strong downdraft", "Large tornado", "Area of calm air", "Long-duration rain"], answer: 0, explanation: "A microburst is a small but intense downdraft, dangerous for aircraft."},
+      {icon: "✈️", question: "How do you recover from a spin?", options: ["Throttle idle, ailerons neutral, full opposite rudder, then elevator forward", "Throttle full, full rudder, ailerons left", "Nose up, throttle full", "Close throttle, ailerons right"], answer: 0, explanation: "Standard spin recovery: power idle, ailerons neutral, opposite rudder, elevator forward."},
+      {icon: "🎚️", question: "What is the advantage of a constant-speed propeller?", options: ["Higher top speed only", "Allows best performance for each phase of flight", "Easier engine starts", "Prevents overspeed"], answer: 1, explanation: "A constant-speed prop lets you set the best blade angle for climb, cruise, etc."},
+      {icon: "🔄", question: "When does the greatest wake turbulence occur?", options: ["Just after takeoff and before landing", "During climb", "At cruise", "After engine shutdown"], answer: 0, explanation: "Greatest when the aircraft is heavy, clean, and slow—typically just after takeoff or before landing."},
+      {icon: "📦", question: "Where can you find the aircraft's weight and balance information?", options: ["Pilot logbook", "Aircraft's POH (Pilot Operating Handbook)", "ATIS", "VOR chart"], answer: 1, explanation: "POH has weight and balance data."},
+      {icon: "🛑", question: "What does a steady red light from the control tower mean in flight?", options: ["Continue circling", "Give way to other aircraft and continue circling", "Return for landing", "Cleared to land"], answer: 1, explanation: "Steady red in flight: Give way and keep circling."},
+      {icon: "🚧", question: "What is the marking for a closed runway?", options: ["Yellow X", "Solid red line", "White chevrons", "Blue lights"], answer: 0, explanation: "A yellow X is used to mark a closed runway."},
+      {icon: "🌩️", question: "What is the greatest danger in a thunderstorm?", options: ["Turbulence and wind shear", "Rain", "Low visibility", "Lightning only"], answer: 0, explanation: "Thunderstorms are most dangerous for their severe turbulence and wind shear."},
+      {icon: "🚨", question: "What transponder code is used for radio communication failure?", options: ["7500", "7600", "7700", "1200"], answer: 1, explanation: "Squawk 7600 for radio failure."},
+      {icon: "✉️", question: "What is the primary source for preflight weather briefings?", options: ["ATIS", "Flight Service Station (FSS) or 1800WXBRIEF", "AIM", "NOTAMs"], answer: 1, explanation: "FSS or 1800WXBRIEF is the standard source."},
+      {icon: "🌪️", question: "What causes wind shear associated with thunderstorms?", options: ["Rapid temperature change", "Updrafts and downdrafts", "Cloud cover", "Humidity"], answer: 1, explanation: "Thunderstorm updrafts and downdrafts create wind shear."},
+      {icon: "🏷️", question: "What must be done if an ELT battery is used for more than 1 cumulative hour?", options: ["Log it and replace battery or recharge", "Nothing", "Notify FAA", "Send to maintenance"], answer: 0, explanation: "After one cumulative hour of use, the ELT battery must be replaced or recharged."},
+      {icon: "🛩️", question: "What is a spin?", options: ["A stall plus yaw", "Climbing turn", "Abrupt pitch up", "Rapid descent"], answer: 0, explanation: "A spin is an aggravated stall with yaw."},
+      {icon: "🚦", question: "What does a flashing green light signal from a tower mean on the ground?", options: ["Cleared to taxi", "Cleared for takeoff", "Return to starting point", "Stop"], answer: 0, explanation: "Flashing green on ground: cleared to taxi."},
+      {icon: "🌊", question: "What causes floating during a landing flare?", options: ["Too fast approach speed", "Too slow approach speed", "Flaps not used", "Crosswind"], answer: 0, explanation: "Too much speed causes floating in ground effect."},
+      {icon: "⚖️", question: "What is the effect of forward CG on an aircraft?", options: ["Less stable", "More stable, higher stall speed", "Lower stall speed", "Less elevator effectiveness"], answer: 1, explanation: "Forward CG increases stability, but also increases stall speed and elevator force needed."},
+      {icon: "🛩️", question: "What is the effect of lowering flaps during takeoff or landing?", options: ["Increases lift and drag", "Decreases lift and drag", "Increases lift only", "Decreases drag only"], answer: 0, explanation: "Flaps increase both lift and drag."},
+      {icon: "🦺", question: "What is the most important pre-takeoff check?", options: ["Weight and balance", "Runup and control check", "Passenger briefing", "Flaps"], answer: 1, explanation: "Engine runup and flight control checks are essential before takeoff."},
+      {icon: "📶", question: "How do you verify VOR accuracy?", options: ["Check at a VOT or designated checkpoint", "Tune to ATIS", "Monitor squawk code", "Call ATC"], answer: 0, explanation: "VOR accuracy is checked at VOT or a ground checkpoint."}
+    ];
+
+    // ---- Your quiz logic code goes here (with "Start Quiz" button, etc.) ----
+    let started = false;
+    let qIndex = 0;
+    let score = 0;
+
+    function playSound(isCorrect) {
+      if(isCorrect) {
+        document.getElementById("chime").currentTime = 0;
+        document.getElementById("chime").play();
+      } else {
+        document.getElementById("buzzer").currentTime = 0;
+        document.getElementById("buzzer").play();
+      }
+    }
+
+    function showStartScreen() {
+      document.getElementById('quiz').innerHTML = `
+        <div class="center" style="margin-top:2em;">
+          <button onclick="startQuiz()" style="font-size:1.3em; padding:0.7em 2em; border-radius:1em; background:#2563eb; color:white; border:none; cursor:pointer;">
+            Start Quiz
+          </button>
+        </div>
+      `;
+    }
+
+    function startQuiz() {
+      started = true;
+      qIndex = 0;
+      score = 0;
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const q = questions[qIndex];
+      let html = `<div class="question"><span class="icon">${q.icon || "✈️"}</span> ${qIndex+1}. ${q.question}</div><div class="options">`;
+      q.options.forEach((opt, i) => {
+        html += `<button class="option" onclick="selectOption(${i})">${opt}</button>`;
+      });
+      html += `</div>`;
+      document.getElementById('quiz').innerHTML = html;
+    }
+
+    function selectOption(selected) {
+      const q = questions[qIndex];
+      const optionButtons = document.querySelectorAll('button.option');
+      optionButtons.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === q.answer) btn.classList.add('correct');
+        if (i === selected && selected !== q.answer) btn.classList.add('wrong');
+      });
+      if (selected === q.answer) {
+        score++;
+        playSound(true);
+        showResultText("Correct! 🎉", q.explanation, false);
+      } else {
+        playSound(false);
+        showResultText("Incorrect. <span class='buzzer'>You suck!</span>", q.explanation, true);
+      }
+    }
+
+    function showResultText(msg, explanation, isWrong) {
+      const nextLabel = qIndex === questions.length - 1 ? "See Results" : "Next Question";
+      const html = `<div class="result">${msg} ${explanation}
+      <button onclick="nextQuestion()" style="margin-top:1rem; width:100%;">${nextLabel}</button></div>`;
+      document.getElementById('quiz').innerHTML += html;
+    }
+
+    function nextQuestion() {
+      qIndex++;
+      if (qIndex < questions.length) {
+        showQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      document.getElementById('quiz').innerHTML = `<div class="center"><strong>Quiz Complete!</strong><br>
+        Your Score: <span class="score">${score} / ${questions.length}</span><br><br>
+        <button onclick="restartQuiz()" style="margin-top:1rem;">Try Again</button>
+      </div>`;
+    }
+
+    function restartQuiz() {
+      showStartScreen();
+    }
+
+    // Show the Start button when page loads
+    showStartScreen();
+  </script>
+</body>
+</html>
